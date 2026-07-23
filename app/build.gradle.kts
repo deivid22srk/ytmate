@@ -20,10 +20,13 @@ android {
         applicationId = "com.demonc.ytmate"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+        // Multidex nativo em API 21+; habilitado explicitamente para garantir
+        // que todas as classes sejam carregadas corretamente na inicialização.
+        multiDexEnabled = true
     }
 
     if (keystorePropertiesFile.exists()) {
@@ -91,6 +94,7 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("androidx.multidex:multidex:2.0.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
