@@ -1,8 +1,10 @@
 package com.demonc.ytmate.data
 
-import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
@@ -45,21 +47,20 @@ class YouTubeRepository {
 
         val player = gson.fromJson(playerResponseJson, JsonObject::class.java)
         val playability = player.getAsJsonObject("playabilityStatus")
-        val status = playability?.get("status")?.asString
+        val status = playability?.get("status")?.takeIf { !it.isJsonNull }?.asStringSafe()
         if (status != null && status != "OK") {
-            val reason = playability.get("reason")?.asString
-                ?: playability.getAsJsonObject("errorScreen")?.getAsJsonObject("playerErrorMessageRenderer")?.get("subreason")?.asString
+            val reason = playability.get("reason")?.asStringSafe()
                 ?: status
             throw IllegalStateException("Vídeo não disponível: $reason")
         }
 
         val videoDetails = player.getAsJsonObject("videoDetails")
             ?: throw IllegalStateException("Sem videoDetails na resposta do YouTube.")
-        val title = videoDetails.get("title")?.asString ?: "Vídeo sem título"
-        val author = videoDetails.get("author")?.asString ?: "Desconhecido"
-        val lengthSeconds = videoDetails.get("lengthSeconds")?.asString?.toLongOrNull() ?: 0L
+        val title = videoDetails.get("title")?.asStringSafe() ?: "Vídeo sem título"
+        val author = videoDetails.get("author")?.asStringSafe() ?: "Desconhecido"
+        val lengthSeconds = videoDetails.get("lengthSeconds")?.asStringSafe()?.toLongOrNull() ?: 0L
         val thumbnails = videoDetails.getAsJsonObject("thumbnail")?.getAsJsonArray("thumbnails")
-        val thumbnailUrl = thumbnails?.lastOrNull()?.asObject?.get("url")?.asString ?: ""
+        val thumbnailUrl = thumbnails?.lastOrNull()?.asJsonObject?.get("url")?.asStringSafe() ?: ""
 
         val streamingData = player.getAsJsonObject("streamingData")
             ?: throw IllegalStateException("Sem streamingData na resposta do YouTube.")
@@ -71,17 +72,17 @@ class YouTubeRepository {
         val audioStreams = mutableListOf<StreamInfo>()
 
         for (f in adaptiveFormats) {
-            val obj = f.asObject
-            val mimeType = obj.get("mimeType")?.asString ?: continue
-            val itag = obj.get("itag")?.asString ?: "0"
-            val streamUrl = obj.get("url")?.asString ?: continue  // ignora signatureCipher
+            val obj = f.asJsonObject ?: continue
+            val mimeType = obj.get("mimeType")?.asStringSafe() ?: continue
+            val itag = obj.get("itag")?.asStringSafe() ?: "0"
+            val streamUrl = obj.get("url")?.asStringSafe() ?: continue  // ignora signatureCipher
             val ext = guessExtension(mimeType)
-            val bitrate = obj.get("bitrate")?.asInt ?: 0
-            val contentLength = obj.get("contentLength")?.asString?.toLongOrNull() ?: 0L
+            val bitrate = obj.get("bitrate")?.asIntSafe() ?: 0
+            val contentLength = obj.get("contentLength")?.asStringSafe()?.toLongOrNull() ?: 0L
 
             if (mimeType.startsWith("video/", true)) {
-                val height = obj.get("height")?.asInt ?: 0
-                val qualityLabel = if (height > 0) "${height}p" else obj.get("quality")?.asString ?: "video"
+                val height = obj.get("height")?.asIntSafe() ?: 0
+                val qualityLabel = if (height > 0) "${height}p" else obj.get("quality")?.asStringSafe() ?: "video"
                 videoStreams.add(
                     StreamInfo(
                         url = streamUrl,
@@ -115,16 +116,16 @@ class YouTubeRepository {
 
         // Adiciona também os formats combinados (vídeo+áudio em um stream), úteis para MP4 360p/720p
         for (f in combinedFormats) {
-            val obj = f.asObject
-            val mimeType = obj.get("mimeType")?.asString ?: continue
-            val itag = obj.get("itag")?.asString ?: "0"
-            val streamUrl = obj.get("url")?.asString ?: continue
+            val obj = f.asJsonObject ?: continue
+            val mimeType = obj.get("mimeType")?.asStringSafe() ?: continue
+            val itag = obj.get("itag")?.asStringSafe() ?: "0"
+            val streamUrl = obj.get("url")?.asStringSafe() ?: continue
             val ext = guessExtension(mimeType)
-            val qualityLabel = obj.get("qualityLabel")?.asString
-                ?: obj.get("quality")?.asString
+            val qualityLabel = obj.get("qualityLabel")?.asStringSafe()
+                ?: obj.get("quality")?.asStringSafe()
                 ?: "video"
-            val height = obj.get("height")?.asInt ?: 0
-            val contentLength = obj.get("contentLength")?.asString?.toLongOrNull() ?: 0L
+            val height = obj.get("height")?.asIntSafe() ?: 0
+            val contentLength = obj.get("contentLength")?.asStringSafe()?.toLongOrNull() ?: 0L
             videoStreams.add(
                 StreamInfo(
                     url = streamUrl,
@@ -134,7 +135,7 @@ class YouTubeRepository {
                     isVideo = true,
                     sizeBytes = contentLength,
                     extension = ext,
-                    bitrate = obj.get("bitrate")?.asInt ?: 0,
+                    bitrate = obj.get("bitrate")?.asIntSafe() ?: 0,
                     height = height
                 )
             )
@@ -289,3 +290,13 @@ class YouTubeRepository {
         }
     }
 }
+
+// ===== Extensions utilitárias para Gson =====
+
+/** Retorna o valor como String, ou null se o elemento for null ou não for primitivo. */
+private fun JsonElement.asStringSafe(): String? =
+    if (this is JsonPrimitive) this.asString else null
+
+/** Retorna o valor como Int, ou null se o elemento for null ou não for numérico. */
+private fun JsonElement.asIntSafe(): Int? =
+    if (this is JsonPrimitive) this.asInt else null

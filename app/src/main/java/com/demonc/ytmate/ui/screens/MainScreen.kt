@@ -1,7 +1,5 @@
 package com.demonc.ytmate.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,19 +12,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.VideoFile
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,13 +38,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,13 +51,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.livedata.observeAsState
 import coil.compose.AsyncImage
 import com.demonc.ytmate.data.DownloadItem
 import com.demonc.ytmate.data.DownloadStatus
@@ -75,10 +69,10 @@ import com.demonc.ytmate.data.VideoInfo
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val context = LocalContext.current
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val videoInfo by viewModel.videoInfo.collectAsStateWithLifecycle()
-    val error by viewModel.error.collectAsStateWithLifecycle()
-    val downloads by viewModel.downloads.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.observeAsState(false)
+    val videoInfo by viewModel.videoInfo.observeAsState(null)
+    val error by viewModel.error.observeAsState(null)
+    val downloads by viewModel.downloads.observeAsState(emptyList())
     val snackbarHostState = remember { SnackbarHostState() }
 
     var url by rememberSaveable { mutableStateOf("") }
@@ -137,7 +131,7 @@ fun MainScreen(viewModel: MainViewModel) {
                     onClick = { viewModel.loadUrl(url) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                    Icon(Icons.Default.PlayCircle, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Buscar streams")
                 }
@@ -255,14 +249,14 @@ private fun QualitySelectionSection(
             selected = tab == 0,
             onClick = { tab = 0 },
             label = { Text("Vídeo") },
-            leadingIcon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            leadingIcon = { Icon(Icons.Default.VideoFile, contentDescription = null, modifier = Modifier.size(18.dp)) }
         )
         Spacer(Modifier.width(8.dp))
         FilterChip(
             selected = tab == 1,
             onClick = { tab = 1 },
             label = { Text("Áudio") },
-            leadingIcon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            leadingIcon = { Icon(Icons.Default.GraphicEq, contentDescription = null, modifier = Modifier.size(18.dp)) }
         )
     }
     Spacer(Modifier.height(12.dp))
@@ -311,7 +305,7 @@ private fun StreamRow(stream: StreamInfo, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                if (stream.isVideo) Icons.Default.VideoLibrary else Icons.Default.MusicNote,
+                if (stream.isVideo) Icons.Default.HighQuality else Icons.Default.MusicNote,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -356,7 +350,7 @@ private fun DownloadItemRow(item: DownloadItem, onCancel: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     if (item.downloadType == DownloadType.AUDIO)
-                        Icons.Default.MusicNote else Icons.Default.VideoLibrary,
+                        Icons.Default.MusicNote else Icons.Default.VideoFile,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
