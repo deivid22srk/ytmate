@@ -89,7 +89,7 @@ dependencies {
     implementation(libs.androidx.documentfile)
     implementation(libs.coil.compose)
     implementation(libs.okhttp)
-    implementation(libs.newpipe.extractor)
+    implementation(libs.gson)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
