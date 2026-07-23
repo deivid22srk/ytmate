@@ -1,6 +1,8 @@
 # YTMate
 
-App Android para baixar vídeos e músicas do YouTube com seletor de qualidade, construído com **Jetpack Compose** e **Material You M3** (Design 3).
+![Build APK](https://github.com/deivid22srk/ytmate/actions/workflows/build.yml/badge.svg)
+
+App Android para baixar vídeos e músicas do YouTube com seletor de qualidade, construído com **Jetpack Compose** e **Material You M3** (Design 3). O design visual usa Material You M3 como base, inspirado no projeto [Lune](https://github.com/MrDemonc/Lune).
 
 ## Recursos
 
