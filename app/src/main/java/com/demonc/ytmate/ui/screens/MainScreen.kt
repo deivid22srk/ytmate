@@ -21,14 +21,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.VideoFile
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -141,7 +137,7 @@ fun MainScreen(viewModel: MainViewModel) {
                     onClick = { viewModel.loadUrl(url) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(Icons.Default.PlayCircle, contentDescription = null)
+                    Icon(Icons.Default.PlayArrow, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Buscar streams")
                 }
@@ -259,14 +255,14 @@ private fun QualitySelectionSection(
             selected = tab == 0,
             onClick = { tab = 0 },
             label = { Text("Vídeo") },
-            leadingIcon = { Icon(Icons.Default.VideoFile, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            leadingIcon = { Icon(Icons.Default.VideoLibrary, contentDescription = null, modifier = Modifier.size(18.dp)) }
         )
         Spacer(Modifier.width(8.dp))
         FilterChip(
             selected = tab == 1,
             onClick = { tab = 1 },
             label = { Text("Áudio") },
-            leadingIcon = { Icon(Icons.Default.GraphicEq, contentDescription = null, modifier = Modifier.size(18.dp)) }
+            leadingIcon = { Icon(Icons.Default.MusicNote, contentDescription = null, modifier = Modifier.size(18.dp)) }
         )
     }
     Spacer(Modifier.height(12.dp))
@@ -315,7 +311,7 @@ private fun StreamRow(stream: StreamInfo, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                if (stream.isVideo) Icons.Default.HighQuality else Icons.Default.MusicNote,
+                if (stream.isVideo) Icons.Default.VideoLibrary else Icons.Default.MusicNote,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -360,7 +356,7 @@ private fun DownloadItemRow(item: DownloadItem, onCancel: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     if (item.downloadType == DownloadType.AUDIO)
-                        Icons.Default.MusicNote else Icons.Default.VideoFile,
+                        Icons.Default.MusicNote else Icons.Default.VideoLibrary,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )

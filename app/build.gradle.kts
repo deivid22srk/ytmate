@@ -20,8 +20,8 @@ android {
         applicationId = "com.demonc.ytmate"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         // Multidex nativo em API 21+; habilitado explicitamente para garantir
@@ -87,7 +87,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.documentfile)
     implementation(libs.coil.compose)
